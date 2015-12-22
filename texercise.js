@@ -5,11 +5,10 @@
         flickrURL: 'https://api.flickr.com/services/rest/?nojsoncallback=1&format=json',
         getPhotosURL: '&method=flickr.photosets.getPhotos',
         getInfoURL: '&method=flickr.photos.getSizes',
-        apiKey: '',
 
         buildGallery: function(params){
-            this.apiKey = params.apiKey;
-            this._getPhotos(params);
+            this.params = params;
+            this._getPhotos();
         },
 
         _addImagesToDOM: function(photos){
@@ -33,7 +32,7 @@
 
         _getPhotoInfo: function(photos){
             var url = this.flickrURL  + this.getInfoURL
-                + '&api_key=' + this.apiKey
+                + '&api_key=' + this.params.apiKey
 
             photos.photo.forEach(function(photo){
                 var request = new XMLHttpRequest();
@@ -54,14 +53,15 @@
             }, this);
         },
 
-        _getPhotos: function(params){
+        _getPhotos: function(){
             var url = this.flickrURL + this.getPhotosURL 
-                + '&api_key=' + params.apiKey
-                + '&photoset_id=' + params.photosetId
-                + '&user_id=' + params.userId;
+                + '&api_key=' + this.params.apiKey
+                + '&photoset_id=' + this.params.photosetId
+                + '&user_id=' + this.params.userId;
 
             var request = new XMLHttpRequest();
             var self = this;
+            
             request.onreadystatechange = function(){
                 if (request.readyState == 4 && request.status == 200){
                     var parsedResponse = JSON.parse(request.response);
