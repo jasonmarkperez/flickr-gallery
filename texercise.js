@@ -9,57 +9,72 @@
         buildGallery: function(params){
             this.params = params;
             this._getPhotos();
-            this._setupLightboxControls();
+            this._setupElementRefs();
         },
 
-        _setupLightboxControls: function(){
+        _setupElementRefs: function(){
             window.onload = (function(){
                 this.previousButton = document.getElementById('previous');
-                this.nextButton = document.getElementById('next');
-                this.closeButton = document.getElementById('close');
+                this.nextButton     = document.getElementById('next');
+                this.closeButton    = document.getElementById('close');
+                this.lightBoxImage  = document.getElementById('lightbox-image');
             }).bind(this);
-            //since the lightbox always exists, let's only get the elements once
         },
 
-        _addImagesToDOM: function(photos){
-            var newImgTag = document.createElement('div');
-            newImgTag.setAttribute('class', 'image-container');
-            newImgTag.setAttribute('data-original', photos.displayImage);
+        _addImagesToDOM: function(photo){
+            var imageContainer = this._createNewImageContainer(photo);
+            this._createAndAppendImageToContainer(photo, imageContainer);
 
-            var img = document.createElement("img");
-            img.setAttribute('src', photos.previewImage);
-
-            newImgTag.appendChild(img);
-            document.body.appendChild(newImgTag);
-
-            if(typeof newImgTag.previousSibling.getAttribute === 'function'){
-                var previousImage = newImgTag.previousSibling.getAttribute('data-original');
-                newImgTag.previousSibling.setAttribute('data-next-image', photos.displayImage);
+            if(typeof imageContainer.previousSibling.getAttribute === 'function'){
+                var previousImage = imageContainer.previousSibling.getAttribute('data-original');
+                imageContainer.previousSibling.setAttribute('data-next-image', photo.displayImage);
             }
 
-            newImgTag.setAttribute('data-previous-image', previousImage);
+            imageContainer.setAttribute('data-previous-image', previousImage);
 
-            this._attachClick(newImgTag);
+            this._attachClick(imageContainer);
+        },
+
+        _createAndAppendImageToContainer: function(photo, imageContainer){
+            var img = document.createElement("img");
+            img.setAttribute('src', photo.previewImage);
+
+            imageContainer.appendChild(img);
+            document.body.appendChild(imageContainer);
+        },
+
+        _createNewImageContainer: function(photo){
+            var newImageContainer = document.createElement('div');
+            newImageContainer.setAttribute('class', 'image-container');
+            newImageContainer.setAttribute('data-original', photo.displayImage);
+            return newImageContainer;
         },
 
         _attachClick: function(element){
-            var lightBoxImage = document.getElementById('lightbox-image');
-
             element.addEventListener("click", (function(){
                 this.currentElementInLightbox = element;
                 document.body.setAttribute('class', 'lightbox-active');
-                lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.original);
+                this.lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.original);
 
-                this.previousButton.addEventListener('click', (function(){
-                    lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.previousImage);
-                    this.currentElementInLightbox = this.currentElementInLightbox.previousSibling;
-                }).bind(this));
-                this.nextButton.addEventListener('click', (function(){
-                    lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.nextImage);
-                    this.currentElementInLightbox = this.currentElementInLightbox.nextSibling;
-                }).bind(this));
+                this.previousButton.addEventListener('click', this._goPrevious.bind(this));
+                this.nextButton.addEventListener('click', this._goNext.bind(this));
             }).bind(this));
         },
+
+        _attachCloseClick: function(){
+
+        },
+
+        _goNext: function(){
+            this.lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.nextImage);
+            this.currentElementInLightbox = this.currentElementInLightbox.nextSibling;
+        },
+
+        _goPrevious: function() {
+            this.lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.previousImage);
+            this.currentElementInLightbox = this.currentElementInLightbox.previousSibling;
+        },
+
 
         _getPhotoInfo: function(photos){
             var url = this.flickrURL  + this.getInfoURL
