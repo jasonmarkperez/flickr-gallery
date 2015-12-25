@@ -31,8 +31,6 @@
             }
 
             imageContainer.setAttribute('data-previous-image', previousImage);
-
-            this._attachClick(imageContainer);
         },
 
         _createAndAppendImageToContainer: function(photo, imageContainer){
@@ -45,24 +43,21 @@
 
         _createNewImageContainer: function(photo){
             var newImageContainer = document.createElement('div');
-            newImageContainer.setAttribute('class', 'image-container');
+            newImageContainer.setAttribute('id', 'image-container');
             newImageContainer.setAttribute('data-original', photo.displayImage);
+            newImageContainer.addEventListener("click", (function(event){
+                this.currentElementInLightbox = event.target.parentElement;
+                document.body.setAttribute('class', 'lightbox-active');
+                this.lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.original);
+                this.previousButton.addEventListener('click', this._goPrevious.bind(this));
+                this.nextButton.addEventListener('click', this._goNext.bind(this));
+
+            }).bind(this));
             return newImageContainer;
         },
 
-        _attachClick: function(element){
-            element.addEventListener("click", (function(){
-                this.currentElementInLightbox = element;
-                document.body.setAttribute('class', 'lightbox-active');
-                this.lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.original);
-
-                this.previousButton.addEventListener('click', this._goPrevious.bind(this));
-                this.nextButton.addEventListener('click', this._goNext.bind(this));
-            }).bind(this));
-        },
-
         _attachCloseClick: function(){
-
+            //close
         },
 
         _goNext: function(){
