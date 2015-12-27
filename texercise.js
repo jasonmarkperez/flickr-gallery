@@ -153,13 +153,20 @@
     }
 
     function buildGallery(params) {
+        setupElementRefs();
+        getBrowserHeight();
+
         if(!params){
             var params = {};
         }
-        setupElementRefs();
-        params = getURLParametersOrUseParams(params);
-        getBrowserHeight();
-        getPhotos(params.apiKey, params.userId, params.setId, addImageToDOM, failure);
+
+        if(params.apiKey && params.userId && params.setId){
+            getPhotos(params.apiKey, params.userId, params.setId, addImageToDOM, failure);
+        } else {
+            params = getURLParametersOrUseParams(params);
+            getPhotos(params.apiKey, params.userId, params.setId, addImageToDOM, failure);
+        }
+        //if all parameters are supplied to the buildGallery call, we just use these.
     }
 
     function getURLParametersOrUseParams(params){
@@ -188,10 +195,12 @@
         alert('Something bad happened', message);
     }
 
-    buildGallery({
-        apiKey: '2c4c0137d9186c4b88bc23eb80e01aba',
-        userId: '67617854@N04',
-        setId: '72157648256881341'
-    });
+    buildGallery(
+        {
+            apiKey: '2c4c0137d9186c4b88bc23eb80e01aba',
+            userId: '67617854@N04',
+            setId: '72157648256881341'
+        }
+    );
 
 })();
