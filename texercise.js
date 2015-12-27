@@ -153,9 +153,35 @@
     }
 
     function buildGallery(params) {
+        if(!params){
+            var params = {};
+        }
         setupElementRefs();
+        params = getURLParametersOrUseParams(params);
         getBrowserHeight();
         getPhotos(params.apiKey, params.userId, params.setId, addImageToDOM, failure);
+    }
+
+    function getURLParametersOrUseParams(params){
+        var userId = getURLParameter('userid');
+        var apiKey = getURLParameter('apikey');
+        var setId = getURLParameter('setid');
+        if(userId){
+            params.userId = userId;
+        }
+
+        if(apiKey){
+            params.apiKey = apiKey
+        }
+
+        if(setId){
+            params.setId = setId; 
+        }
+        return params;
+    }
+
+    function getURLParameter(name) {
+      return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
     }
 
     function failure(message){
