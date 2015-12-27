@@ -92,6 +92,7 @@
     }
 
     function close() {
+        document.body.removeEventListener('click', close);
         document.body.classList.remove('lightbox-active');
     }
 
@@ -131,6 +132,7 @@
         document.body.addEventListener('click', function(e){
             close();
         });
+        document.body.addEventListener('click', close);
         imageTitle.innerHTML = currentElementInLightbox.dataset.title;
         lightboxImage.setAttribute('style', 'max-height: ' + scaledBrowserHeight + 'px');
         lightboxImage.setAttribute('src', currentElementInLightbox.dataset.original);
