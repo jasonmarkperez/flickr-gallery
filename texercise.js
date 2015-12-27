@@ -1,10 +1,11 @@
 "use strict";
 
 (function (){
-    var flickrURL         =  'https://api.flickr.com/services/rest/?nojsoncallback=1&format=json';
-    var getPhotosURL      =  '&method=flickr.photosets.getPhotos';
-    var getInfoURL        =  '&method=flickr.photos.getSizes';
-    var peopleGetInfoURL  =  '&method=flickr.people.getInfo';
+    var flickrURL         = 'https://api.flickr.com/services/rest/?nojsoncallback=1&format=json';
+    var getPhotosURL      = '&method=flickr.photosets.getPhotos';
+    var getInfoURL        = '&method=flickr.photos.getSizes';
+    var peopleGetInfoURL  = '&method=flickr.people.getInfo';
+    var getPhotosetInfoURL= '&method=flickr.photosets.getInfo';
     var imagesPerPage   = 21;
     var lightboxImage;
     var lightboxGrid;
@@ -16,6 +17,8 @@
     var realNameElement;
     var userDescriptionElement;
     var profileUrlElement;
+    var setTitleElement;
+    var setDescriptionElement;
 
     function buildGallery(params) {
         window.onload = function(){
@@ -47,6 +50,9 @@
         lightboxGrid = doc.getElementById('image-grid');
         imageTitle  = doc.getElementById('image-title');
         lightboxImage = doc.getElementById('lightbox-image');
+
+        setTitleElement = doc.getElementById('set-title');
+        setDescriptionElement = doc.getElementById('set-description');
 
         userNameElement = doc.getElementById('user-name');
         realNameElement = doc.getElementById('real-name');
@@ -86,7 +92,6 @@
             var profileUrl = person.profileurl._content;
 
             if(person){
-
                 if(userName && userNameElement){
                     userNameElement.innerHTML = userName;
                 }
@@ -109,12 +114,32 @@
         get(url, appendUserInfoToDom, failure);
     }
 
+    function getPhotosetInfo(apiKey, userId, setId){
+        var url = flickrURL + getPhotosetInfoURL + '&api_key=' + apiKey + '&photoset_id=' + setId;
+
+        function updateHTMLTitle(response){
+            var photosetInfo = response.photoset;
+
+            if(photosetInfo){
+                var photosetTitle = photosetInfo.title._content;
+                var photosetUserName = photosetInfo.username._content;
+                var photosetDescription = photosetInfo.description._content;
+                document.title = photosetTitle + ' by ' + photosetUserName;
+                setTitleElement.innerHTML = photosetTitle;
+                setDescriptionElement.innerHTML = photosetDescription;
+            }
+        }
+
+        get(url, updateHTMLTitle, failure);
+    }
+
     function getPhotos(apiKey, userId, setId, success, failure) {
         var url = flickrURL + getPhotosURL + '&api_key=' + apiKey + '&photoset_id=' + setId + '&user_id=' + userId + '&per_page=' + imagesPerPage;
 
         function parseResponse(response){
             var parsedResponse = response.photoset;
-            getUserInfo(apiKey, userId);  
+            getUserInfo(apiKey, userId);
+            getPhotosetInfo(apiKey, userId, setId);
             getPhotosInfo(apiKey, parsedResponse, success, failure);
         }
 
@@ -129,7 +154,6 @@
             var photoSizes      = parsedResponse.sizes.size;
             //there could be better control over what images to use
             //we are using the smallest and nearly the largest
-
             success({
               previewImage: photoSizes[1].source,
               displayImage: photoSizes[9].source,
