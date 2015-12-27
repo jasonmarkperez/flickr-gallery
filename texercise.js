@@ -6,6 +6,7 @@
     var getInfoURL        = '&method=flickr.photos.getSizes';
     var peopleGetInfoURL  = '&method=flickr.people.getInfo';
     var getPhotosetInfoURL= '&method=flickr.photosets.getInfo';
+    var doc = document;
     var imagesPerPage   = 21;
     var lightboxImage;
     var lightboxGrid;
@@ -13,16 +14,6 @@
     var currentElementInLightbox;
     var browserHeight;
     var browserWidth;
-    var userNameElement;
-    var realNameElement;
-    var userDescriptionElement;
-    var profileUrlElement;
-    var setTitleElement;
-    var setDescriptionElement;
-    var setUsernameElement;
-    var photographerInfoElement;
-    var moreAboutElement;
-    var lessAboutElement;
 
     function buildGallery(params) {
         window.onload = function(){
@@ -45,7 +36,9 @@
     }
 
     function setupElementRefs() {
-        var doc = document;
+        var moreAboutElement;
+        var lessAboutElement;
+        var photographerInfoElement = doc.getElementById('photographer-info');
 
         doc.getElementById('previous').addEventListener('click', goPrevious);
         doc.getElementById('next').addEventListener('click', goNext);
@@ -54,12 +47,6 @@
         lightboxGrid = doc.getElementById('image-grid');
         imageTitle  = doc.getElementById('image-title');
         lightboxImage = doc.getElementById('lightbox-image');
-
-        photographerInfoElement = doc.getElementById('photographer-info');
-
-        setTitleElement = doc.getElementById('set-title');
-        setDescriptionElement = doc.getElementById('set-description');
-        setUsernameElement = doc.getElementById('set-username');
 
         moreAboutElement = doc.getElementById('more-about')
         lessAboutElement = doc.getElementById('less-about');
@@ -75,11 +62,6 @@
             moreAboutElement.className = 'display';
             lessAboutElement.className = 'hide';
         });
-
-        userNameElement = doc.getElementById('user-name');
-        realNameElement = doc.getElementById('real-name');
-        userDescriptionElement = doc.getElementById('user-description');
-        profileUrlElement = doc.getElementById('profile-url');
 
         lightboxImage.addEventListener('click', function(event){
             event.stopPropagation();
@@ -113,6 +95,11 @@
             var description = person.description._content;
             var profileUrl = person.profileurl._content;
 
+            var userNameElement = doc.getElementById('user-name');
+            var realNameElement = doc.getElementById('real-name');
+            var userDescriptionElement = doc.getElementById('user-description');
+            var profileUrlElement = doc.getElementById('profile-url');
+
             if(person){
                 if(userName && userNameElement){
                     userNameElement.innerHTML = userName;
@@ -143,11 +130,15 @@
             var photosetInfo = response.photoset;
 
             if(photosetInfo){
-                console.log(photosetInfo);
                 var photosetTitle = photosetInfo.title._content;
                 var photosetUserName = photosetInfo.username;
                 var photosetDescription = photosetInfo.description._content;
-                document.title = photosetTitle + ' by ' + photosetUserName;
+
+                var setTitleElement = doc.getElementById('set-title');
+                var setDescriptionElement = doc.getElementById('set-description');
+                var setUsernameElement = doc.getElementById('set-username');
+
+                doc.title = photosetTitle + ' by ' + photosetUserName;
                 setTitleElement.innerHTML = photosetTitle;
                 setDescriptionElement.innerHTML = photosetDescription;
                 setUsernameElement.innerHTML = photosetUserName;
@@ -210,8 +201,8 @@
     }
 
     function close() {
-        document.body.removeEventListener('click', close);
-        document.body.classList.remove('lightbox-active');
+        doc.body.removeEventListener('click', close);
+        doc.body.classList.remove('lightbox-active');
     }
 
     function addImageToDOM(photo) {
@@ -228,14 +219,14 @@
     }
 
     function createAndAppendImageToContainer (photo, imageContainer){
-        var img = document.createElement("img");
+        var img = doc.createElement("img");
         img.setAttribute('src', photo.previewImage);
         imageContainer.appendChild(img);
         lightboxGrid.appendChild(imageContainer);
     }
 
     function createImageContainer (photo){
-        var imageContainer = document.createElement('div');
+        var imageContainer = doc.createElement('div');
         imageContainer.setAttribute('id', 'preview-container');
         imageContainer.setAttribute('data-original', photo.displayImage);
         imageContainer.addEventListener("click", openLightbox);
@@ -245,9 +236,9 @@
     function openLightbox(){
         var scaledBrowserHeight = browserHeight - 40;
         currentElementInLightbox = event.target.parentElement;
-        document.body.setAttribute('class', 'lightbox-active');
+        doc.body.setAttribute('class', 'lightbox-active');
         event.stopPropagation();
-        document.body.addEventListener('click', close);
+        doc.body.addEventListener('click', close);
         imageTitle.innerHTML = currentElementInLightbox.dataset.title;
         lightboxImage.setAttribute('style', 'max-height: ' + scaledBrowserHeight + 'px');
         lightboxImage.setAttribute('src', currentElementInLightbox.dataset.original);
@@ -258,14 +249,14 @@
           //Non-IE
           browserWidth = window.innerWidth;
           browserHeight = window.innerHeight;
-        } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+        } else if( doc.documentElement && ( doc.documentElement.clientWidth || doc.documentElement.clientHeight ) ) {
           //IE 6+ in 'standards compliant mode'
-          browserWidth = document.documentElement.clientWidth;
-          browserHeight = document.documentElement.clientHeight;
-        } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+          browserWidth = doc.documentElement.clientWidth;
+          browserHeight = doc.documentElement.clientHeight;
+        } else if( doc.body && ( doc.body.clientWidth || doc.body.clientHeight ) ) {
           //IE 4 compatible
-          browserWidth = document.body.clientWidth;
-          browserHeight = document.body.clientHeight;
+          browserWidth = doc.body.clientWidth;
+          browserHeight = doc.body.clientHeight;
         }
     }
 
