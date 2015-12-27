@@ -1,3 +1,9 @@
+a{
+  color: #333;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 #image-grid {
   padding-top: 20px;
   width: 1148px;
@@ -109,9 +115,11 @@
 	display: block;
 }
 
+/*utility*/
 .display {
   display: block !important; 
 }
+
 .hide {
   display: none !important;
 }
