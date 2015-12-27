@@ -19,6 +19,10 @@
     var profileUrlElement;
     var setTitleElement;
     var setDescriptionElement;
+    var setUsernameElement;
+    var photographerInfoElement;
+    var moreAboutElement;
+    var lessAboutElement;
 
     function buildGallery(params) {
         window.onload = function(){
@@ -51,8 +55,26 @@
         imageTitle  = doc.getElementById('image-title');
         lightboxImage = doc.getElementById('lightbox-image');
 
+        photographerInfoElement = doc.getElementById('photographer-info');
+
         setTitleElement = doc.getElementById('set-title');
         setDescriptionElement = doc.getElementById('set-description');
+        setUsernameElement = doc.getElementById('set-username');
+
+        moreAboutElement = doc.getElementById('more-about')
+        lessAboutElement = doc.getElementById('less-about');
+
+        moreAboutElement.addEventListener('click', function(event){
+            photographerInfoElement.className = 'display';
+            moreAboutElement.className = 'hide';
+            lessAboutElement.className = 'display';
+        });
+
+        lessAboutElement.addEventListener('click', function(event){
+            photographerInfoElement.className = 'hide';
+            moreAboutElement.className = 'display';
+            lessAboutElement.className = 'hide';
+        });
 
         userNameElement = doc.getElementById('user-name');
         realNameElement = doc.getElementById('real-name');
@@ -121,12 +143,14 @@
             var photosetInfo = response.photoset;
 
             if(photosetInfo){
+                console.log(photosetInfo);
                 var photosetTitle = photosetInfo.title._content;
-                var photosetUserName = photosetInfo.username._content;
+                var photosetUserName = photosetInfo.username;
                 var photosetDescription = photosetInfo.description._content;
                 document.title = photosetTitle + ' by ' + photosetUserName;
                 setTitleElement.innerHTML = photosetTitle;
                 setDescriptionElement.innerHTML = photosetDescription;
+                setUsernameElement.innerHTML = photosetUserName;
             }
         }
 

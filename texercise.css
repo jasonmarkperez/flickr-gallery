@@ -14,11 +14,26 @@
   padding: 15px;
   font-size: 13px;
   line-height: 1.5;
+  display: none;
+}
+
+#less-about {
+  display: none;
 }
 
 #photographer-info .info-header {
   font-weight: bold;
 }
+
+#set-info {
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 10px;
+}
+  #set-info #set-title{
+    font-weight: bold;
+    font-size: 14px;
+  }
 
 #preview-container{
   display: inline-block;
@@ -92,4 +107,11 @@
 
 .lightbox-active #lightbox{
 	display: block;
+}
+
+.display {
+  display: block !important; 
+}
+.hide {
+  display: none !important;
 }
