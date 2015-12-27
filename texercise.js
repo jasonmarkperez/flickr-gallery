@@ -1,11 +1,6 @@
 "use strict";
 
 (function (){
-    var flickrURL         = 'https://api.flickr.com/services/rest/?nojsoncallback=1&format=json';
-    var getPhotosURL      = '&method=flickr.photosets.getPhotos';
-    var getInfoURL        = '&method=flickr.photos.getSizes';
-    var peopleGetInfoURL  = '&method=flickr.people.getInfo';
-    var getPhotosetInfoURL= '&method=flickr.photosets.getInfo';
     var doc = document;
     var imagesPerPage   = 21;
     var lightboxImage;
@@ -14,6 +9,11 @@
     var currentElementInLightbox;
     var browserHeight;
     var browserWidth;
+    var flickrURL         = 'https://api.flickr.com/services/rest/?nojsoncallback=1&format=json';
+    var getPhotosURL      = '&method=flickr.photosets.getPhotos';
+    var getInfoURL        = '&method=flickr.photos.getSizes';
+    var peopleGetInfoURL  = '&method=flickr.people.getInfo';
+    var getPhotosetInfoURL= '&method=flickr.photosets.getInfo';
 
     function buildGallery(params) {
         window.onload = function(){
