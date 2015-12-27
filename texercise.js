@@ -69,7 +69,7 @@
                 success(response, args);
             }  else if (request.status != 200 && request.status != 304) {
                 //this could have more options and take into account more response codes
-                console.log('err', request);
+                // console.log('err', request);
                 failure(request.status);
             }
         };
@@ -100,6 +100,7 @@
                 }
 
                 if(profileUrl && profileUrlElement){
+                    profileUrlElement.setAttribute('href', profileUrl);
                     profileUrlElement.innerHTML = profileUrl;
                 }
             }

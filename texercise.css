@@ -1,5 +1,5 @@
 #image-grid {
-  padding-top: 50px;
+  padding-top: 20px;
   width: 1148px;
   margin: 0 auto;
 }
@@ -8,6 +8,16 @@
   #image-grid {
     width: 1148px;
   }
+}
+
+#photographer-info {
+  padding: 15px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#photographer-info .info-header {
+  font-weight: bold;
 }
 
 #preview-container{

@@ -9,24 +9,33 @@
 <body>
 
 	<div id="photographer-info">
-		<div id="user-name"></div>
-		<div id="real-name"></div>
-		<div id="user-description"></div>
-		<div id="profile-url"></div>
+		<div>
+			<span class="info-header">Username: </span>
+			<span class="photog-info" id="user-name"></span>
+		</div>
+		<div>
+			<span class="info-header">Name: </span>
+			<span class="photog-info" id="real-name"></span>
+		</div>
+		<div>
+			<span class="info-header">Bio: </span>
+			<span class="photog-info" id="user-description"></span>
+		</div>
+		<div>
+			<span class="info-header">Profile URL: </span>
+			<a class="photog-info" id="profile-url" target="_blank"></a>
+		</div>
 	</div>
 
 	<div id="image-grid">
 	</div>
 
-
 	<div id="lightbox">
-
 		<img id="lightbox-image">
 		<div id="image-title"></div>
 		<a class="nav-links" id="previous">Previous</a>
 		<a class="nav-links" id="next">Next</a>
 		<a class="nav-links" id="close">Close</a>
-
 	</div>
 </body>
 </html>
