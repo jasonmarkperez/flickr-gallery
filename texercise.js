@@ -1,129 +1,171 @@
+"use strict";
+
 (function (){
+    var flickrURL =  'https://api.flickr.com/services/rest/?nojsoncallback=1&format=json';
+    var getPhotosURL =  '&method=flickr.photosets.getPhotos';
+    var getInfoURL =  '&method=flickr.photos.getSizes';
+    var imagesPerPage = 21;
+    var lightboxImage;
+    var lightboxGrid;
+    var imageTitle;
+    var currentElementInLightbox;
+    var browserHeight;
+    var browserWidth;
 
-    var flickrAPI = {
+    function get(url, success, failure, args) {
+        var request = new XMLHttpRequest();
+        request.open('GET', url);
+        request.send();
 
-        flickrURL: 'https://api.flickr.com/services/rest/?nojsoncallback=1&format=json',
-        getPhotosURL: '&method=flickr.photosets.getPhotos',
-        getInfoURL: '&method=flickr.photos.getSizes',
-
-        buildGallery: function(params){
-            this.params = params;
-            this._getPhotos();
-            this._setupElementRefs();
-        },
-
-        _setupElementRefs: function(){
-            window.onload = (function(){
-                this.previousButton = document.getElementById('previous');
-                this.nextButton     = document.getElementById('next');
-                this.closeButton    = document.getElementById('close');
-                this.lightBoxImage  = document.getElementById('lightbox-image');
-            }).bind(this);
-        },
-
-        _addImagesToDOM: function(photo){
-            var imageContainer = this._createNewImageContainer(photo);
-            this._createAndAppendImageToContainer(photo, imageContainer);
-
-            if(typeof imageContainer.previousSibling.getAttribute === 'function'){
-                var previousImage = imageContainer.previousSibling.getAttribute('data-original');
-                imageContainer.previousSibling.setAttribute('data-next-image', photo.displayImage);
+        request.onreadystatechange = function(){
+            if (request.readyState == 4 && request.status == 200){
+                success(request, args);
+            }  else if (request.status != 200 && request.status != 304) {
+                failure(request.status);
             }
+        };
+    }
+    
+    function getPhotos(apiKey, userId, setId, success, failure) {
+        var url = flickrURL + getPhotosURL + '&api_key=' + apiKey + '&photoset_id=' + setId + '&user_id=' + userId + '&per_page=' + imagesPerPage;
 
-            imageContainer.setAttribute('data-previous-image', previousImage);
-        },
+        function parseResponse(request){
+            var parsedResponse = JSON.parse(request.response).photoset;
+            getPhotosInfo(apiKey, parsedResponse, success, failure);
+        }
 
-        _createAndAppendImageToContainer: function(photo, imageContainer){
-            var img = document.createElement("img");
-            img.setAttribute('src', photo.previewImage);
-
-            imageContainer.appendChild(img);
-            document.body.appendChild(imageContainer);
-        },
-
-        _createNewImageContainer: function(photo){
-            var newImageContainer = document.createElement('div');
-            newImageContainer.setAttribute('id', 'image-container');
-            newImageContainer.setAttribute('data-original', photo.displayImage);
-            newImageContainer.addEventListener("click", (function(event){
-                this.currentElementInLightbox = event.target.parentElement;
-                document.body.setAttribute('class', 'lightbox-active');
-                this.lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.original);
-                this.previousButton.addEventListener('click', this._goPrevious.bind(this));
-                this.nextButton.addEventListener('click', this._goNext.bind(this));
-
-            }).bind(this));
-            return newImageContainer;
-        },
-
-        _attachCloseClick: function(){
-            //close
-        },
-
-        _goNext: function(){
-            this.lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.nextImage);
-            this.currentElementInLightbox = this.currentElementInLightbox.nextSibling;
-        },
-
-        _goPrevious: function() {
-            this.lightBoxImage.setAttribute('src', this.currentElementInLightbox.dataset.previousImage);
-            this.currentElementInLightbox = this.currentElementInLightbox.previousSibling;
-        },
-
-
-        _getPhotoInfo: function(photos){
-            var url = this.flickrURL  + this.getInfoURL
-                + '&api_key=' + this.params.apiKey
-
-            photos.photo.forEach(function(photo){
-
-                var request = new XMLHttpRequest();
-                url = url + '&photo_id=' + photo.id;
-
-                request.onreadystatechange = function(images){
-                    if (request.readyState == 4 && request.status == 200){
-                        var parsedResponse  = JSON.parse(request.response);
-                        var photoSizes      = parsedResponse.sizes.size;
-                        var photoSizeLength = photoSizes.length
-
-                        this._addImagesToDOM({
-                            previewImage: photoSizes[1].source,
-                            displayImage: photoSizes[photoSizeLength-1].source
-                        })
-
-                    }
-                }.bind(this);
-
-                request.open('GET', url);
-                request.send();
-            }, this);
-        },
-
-        _getPhotos: function(){
-            var url = this.flickrURL + this.getPhotosURL 
-                + '&api_key=' + this.params.apiKey
-                + '&photoset_id=' + this.params.photosetId
-                + '&user_id=' + this.params.userId;
-
-            var request = new XMLHttpRequest();
-            var self = this;
-
-            request.onreadystatechange = function(){
-                if (request.readyState == 4 && request.status == 200){
-                    var parsedResponse = JSON.parse(request.response);
-                    self._getPhotoInfo(parsedResponse.photoset);
-                }
-            };
-
-            request.open('GET', url);
-            request.send();
-        },
+        get(url, parseResponse, failure);
     }
 
-    flickrAPI.buildGallery({
+    function getPhotosInfo(apiKey, photos, success, failure) {
+        var url = flickrURL  + getInfoURL + '&api_key=' + apiKey;
+
+        function parseResponse(request, photoTitle){
+          var parsedResponse  = JSON.parse(request.response);
+          var photoSizes      = parsedResponse.sizes.size;
+          var photoSizeLength = photoSizes.length
+
+          success({
+              previewImage: photoSizes[1].source,
+              displayImage: photoSizes[9].source,
+              photoTitle: photoTitle
+          });
+        }
+
+        photos.photo.forEach(function(photo){
+            url = url + '&photo_id=' + photo.id;
+            get(url, parseResponse, failure, photo.title);
+        });
+    }
+    
+    function setupElementRefs() {
+        window.onload = function(){
+            var doc = document;
+            doc.getElementById('previous').addEventListener('click', goPrevious);
+            doc.getElementById('next').addEventListener('click', goNext);
+            doc.getElementById('close').addEventListener('click', close);
+            lightboxImage = doc.getElementById('lightbox-image');
+            lightboxImage.addEventListener('click', function(event){
+                event.stopPropagation();
+            });
+            lightboxGrid = doc.getElementById('image-grid');
+            imageTitle = doc.getElementById('image-title');
+        };
+    }
+
+    function goNext() {
+        event.stopPropagation();
+        if(currentElementInLightbox.dataset.nextImage){
+            lightboxImage.setAttribute('src', currentElementInLightbox.dataset.nextImage);
+            currentElementInLightbox = currentElementInLightbox.nextSibling;
+            imageTitle.innerHTML = currentElementInLightbox.dataset.title;
+        }
+    }
+
+    function goPrevious() {
+        event.stopPropagation();
+        if(currentElementInLightbox.dataset.previousImage){
+            lightboxImage.setAttribute('src', currentElementInLightbox.dataset.previousImage);
+            currentElementInLightbox = currentElementInLightbox.previousSibling;
+            imageTitle.innerHTML = currentElementInLightbox.dataset.title;
+        }
+    }
+
+    function close() {
+        document.body.classList.remove('lightbox-active');
+    }
+
+    function addImageToDOM(photo) {
+        var imageContainer = createImageContainer(photo);
+        createAndAppendImageToContainer(photo, imageContainer);
+        if(imageContainer.previousSibling && typeof imageContainer.previousSibling.getAttribute === 'function'){
+            var previousImage = imageContainer.previousSibling.getAttribute('data-original');
+            imageContainer.previousSibling.setAttribute('data-next-image', photo.displayImage);
+        }
+        if(previousImage){
+            imageContainer.setAttribute('data-previous-image', previousImage);
+        }
+        imageContainer.setAttribute('data-title', photo.photoTitle);
+    }
+
+    function createAndAppendImageToContainer (photo, imageContainer){
+        var img = document.createElement("img");
+        img.setAttribute('src', photo.previewImage);
+        imageContainer.appendChild(img);
+        lightboxGrid.appendChild(imageContainer);
+    }
+
+    function createImageContainer (photo){
+        var imageContainer = document.createElement('div');
+        imageContainer.setAttribute('id', 'preview-container');
+        imageContainer.setAttribute('data-original', photo.displayImage);
+        imageContainer.addEventListener("click", openLightbox);
+        return imageContainer;
+    }
+
+    function openLightbox(){
+        var scaledBrowserHeight = browserHeight - 40;
+        currentElementInLightbox = event.target.parentElement;
+        document.body.setAttribute('class', 'lightbox-active');
+        event.stopPropagation();
+        document.body.addEventListener('click', function(e){
+            close();
+        });
+        imageTitle.innerHTML = currentElementInLightbox.dataset.title;
+        lightboxImage.setAttribute('style', 'max-height: ' + scaledBrowserHeight + 'px');
+        lightboxImage.setAttribute('src', currentElementInLightbox.dataset.original);
+    }
+
+    function getBrowserHeight(){
+        if( typeof( window.innerWidth ) == 'number' ) {
+          //Non-IE
+          browserWidth = window.innerWidth;
+          browserHeight = window.innerHeight;
+        } else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) {
+          //IE 6+ in 'standards compliant mode'
+          browserWidth = document.documentElement.clientWidth;
+          browserHeight = document.documentElement.clientHeight;
+        } else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) {
+          //IE 4 compatible
+          browserWidth = document.body.clientWidth;
+          browserHeight = document.body.clientHeight;
+        }
+    }
+
+    function buildGallery(params) {
+        setupElementRefs();
+        getBrowserHeight();
+        getPhotos(params.apiKey, params.userId, params.setId, addImageToDOM, failure);
+    }
+
+    function failure(message){
+        alert('Something bad happened', message);
+    }
+
+    buildGallery({
         apiKey: '2c4c0137d9186c4b88bc23eb80e01aba',
-        userId: '32992083@N00',
-        photosetId: '72157642810856243'
+        userId: '67617854@N04',
+        setId: '72157648256881341'
     });
 
 })();
