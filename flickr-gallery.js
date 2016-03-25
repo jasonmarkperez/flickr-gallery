@@ -288,7 +288,7 @@
 
     buildGallery(
         {
-            apiKey: '2c4c0137d9186c4b88bc23eb80e01aba',
+            apiKey: '',
             userId: '67617854@N04',
             setId: '72157648256881341'
         }
